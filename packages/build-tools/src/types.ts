@@ -210,6 +210,7 @@ export interface PageData {
   legacyRefs: string[];
   tags: string[];
   aliases: string[];
+  lastReviewed: string | null;
   previewNotice: string | null;
   sourceSha256: string;
 }

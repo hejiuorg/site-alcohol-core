@@ -333,7 +333,7 @@ const schemas = [
         place_refs: z.array(idSchema).default([]),
         organizer_refs: z.array(idSchema).default([]),
         official_url: urlSchema.optional(),
-        event_status: z.enum(['upcoming', 'past', 'cancelled', 'unknown']),
+        event_status: z.enum(['upcoming', 'ongoing', 'past', 'cancelled', 'unknown']),
     }),
 ];
 export const contentSchema = z

@@ -179,6 +179,21 @@ function buildFacts(
     }
     link('官方网址', 'Official site', data.official_url);
   }
+  if (record.type === 'event') {
+    const statusMap: Record<string, [string, string]> = {
+      upcoming: ['未开始', 'Upcoming'],
+      ongoing: ['进行中', 'Ongoing'],
+      past: ['已结束', 'Past'],
+      cancelled: ['已取消', 'Cancelled'],
+      unknown: ['待确认', 'To be confirmed'],
+    };
+    const status = statusMap[String(data.event_status)];
+    if (typeof data.start === 'string') text('开始时间', 'Starts', data.start);
+    if (typeof data.end === 'string') text('结束时间', 'Ends', data.end);
+    if (status) text('活动状态', 'Event status', zh ? status[0] : status[1]);
+    text('时区', 'Time zone', data.timezone);
+    link('官方页面', 'Official page', data.official_url);
+  }
   if (record.type === 'region') {
     const levelMap: Record<string, [string, string]> = {
       country: ['国家', 'Country'],
@@ -394,6 +409,12 @@ function buildPage(
     }
   }
 
+  const reviewedDates = record.frontmatter.sources
+    .map((source) => source.accessed)
+    .filter((value): value is string => typeof value === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(value))
+    .sort();
+  const lastReviewed = reviewedDates.at(-1) ?? null;
+
   return {
     id: record.id,
     type: record.type,
@@ -430,6 +451,7 @@ function buildPage(
     legacyRefs: record.frontmatter.legacy_refs,
     tags: record.frontmatter.tags,
     aliases: record.frontmatter.aliases,
+    lastReviewed,
     previewNotice,
     sourceSha256: record.sourceSha256,
   };

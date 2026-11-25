@@ -132,6 +132,24 @@ function buildFacts(record, lang) {
         }
         link('官方网址', 'Official site', data.official_url);
     }
+    if (record.type === 'event') {
+        const statusMap = {
+            upcoming: ['未开始', 'Upcoming'],
+            ongoing: ['进行中', 'Ongoing'],
+            past: ['已结束', 'Past'],
+            cancelled: ['已取消', 'Cancelled'],
+            unknown: ['待确认', 'To be confirmed'],
+        };
+        const status = statusMap[String(data.event_status)];
+        if (typeof data.start === 'string')
+            text('开始时间', 'Starts', data.start);
+        if (typeof data.end === 'string')
+            text('结束时间', 'Ends', data.end);
+        if (status)
+            text('活动状态', 'Event status', zh ? status[0] : status[1]);
+        text('时区', 'Time zone', data.timezone);
+        link('官方页面', 'Official page', data.official_url);
+    }
     if (record.type === 'region') {
         const levelMap = {
             country: ['国家', 'Country'],
@@ -309,6 +327,11 @@ function buildPage(entity, record, lang, index, contracts, previewOrigins, mode,
                 'The Chinese source changed after this translation. This preview needs a fresh translation review.';
         }
     }
+    const reviewedDates = record.frontmatter.sources
+        .map((source) => source.accessed)
+        .filter((value) => typeof value === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(value))
+        .sort();
+    const lastReviewed = reviewedDates.at(-1) ?? null;
     return {
         id: record.id,
         type: record.type,
@@ -345,6 +368,7 @@ function buildPage(entity, record, lang, index, contracts, previewOrigins, mode,
         legacyRefs: record.frontmatter.legacy_refs,
         tags: record.frontmatter.tags,
         aliases: record.frontmatter.aliases,
+        lastReviewed,
         previewNotice,
         sourceSha256: record.sourceSha256,
     };

@@ -37,7 +37,9 @@ const active =
       ? 'places'
       : site.key === 'beverages'
         ? 'drinks'
-        : '';
+        : site.key === 'culture'
+          ? 'culture'
+          : '';
 const alternateHref = pageAlternateHref(page);
 const alternateState = pageAlternateState(page);
 const saveHref = siteLink(

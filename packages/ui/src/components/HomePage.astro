@@ -64,7 +64,7 @@ const stickerThree = lang === 'zh' ? 'D 泡沫酒杯' : 'D · the foam glass';
   canonical={canonical}
   pagePath={home}
   noindex={noindex}
-  active={isMain ? 'guide' : site.key === 'atlas' ? 'places' : ''}
+  active={isMain ? 'guide' : site.key === 'atlas' ? 'places' : site.key === 'beverages' ? 'drinks' : site.key === 'culture' ? 'culture' : ''}
   pageType="home"
 >
   <div class="shell">

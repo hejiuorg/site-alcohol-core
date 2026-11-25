@@ -39,7 +39,7 @@ const {
   canonical,
   pagePath,
   noindex = false,
-  active = 'discover',
+  active = 'guide',
   pageType = 'page',
   alternateHref,
   alternateState = 'available',
@@ -264,18 +264,18 @@ const pageState = !noindex
           <p class="footer-note">{labels.footerNote}</p>
           <p class="footer-note footer-note--muted">{labels.footerRights}</p>
         </div>
-        <nav class="footer-col" aria-label={labels.otherSites}>
-          <p class="footer-col__title">{labels.otherSites}</p>
+        <nav class="footer-col" aria-label={labels.sitesNav}>
+          <p class="footer-col__title">{labels.sitesNav}</p>
           {context.data.contracts.sites.map((entry) => (
             <a href={siteLink(site.key, entry.key, home, origins)}>{lang === 'zh' ? entry.labelZh : entry.labelEn}</a>
           ))}
+          <a href={savedHref}>{labels.navSaved}</a>
         </nav>
         <nav class="footer-col" aria-label={labels.siteSummary}>
           <p class="footer-col__title">{labels.about}</p>
           <a href={aboutHref}>{labels.about}</a>
           <a href={contributeHref}>{labels.contribute}</a>
           <a href={searchPageHref}>{labels.search}</a>
-          <a href={savedHref}>{labels.savedTitle}</a>
         </nav>
       </div>
       <div class="shell footer-bottom">

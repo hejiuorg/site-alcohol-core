@@ -28,7 +28,7 @@ const home = homePath(lang);
 const label = typeLabel(contracts, list.type, lang);
 const title = `${label} · ${lang === 'zh' ? site.labelZh : site.labelEn} · ${lang === 'zh' ? '喝酒去' : 'Hejiu'}`;
 const canonical = `https://${site.host}${listPath(list.typePath, lang)}`;
-const active = site.main ? 'guide' : site.key === 'atlas' ? 'places' : site.key === 'beverages' ? 'drinks' : '';
+const active = site.main ? 'guide' : site.key === 'atlas' ? 'places' : site.key === 'beverages' ? 'drinks' : site.key === 'culture' ? 'culture' : '';
 const stats = directoryStats(list);
 const intro = typeIntro(list.type, lang) || list.description;
 const highlights = qualityRank(list.pages.filter((page) => page.published), lang, 3);

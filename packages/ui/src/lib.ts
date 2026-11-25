@@ -20,7 +20,7 @@ export const uiText = {
     brandRoman: 'HEJIU',
     skipToContent: '跳到正文',
     navDiscover: '发现',
-    navDrinks: '识酒',
+    navDrinks: '诗酒',
     navGuide: '喝法',
     navCulture: '酒文化',
     navPlaces: '去处',
@@ -148,6 +148,7 @@ export const uiText = {
     noindex: 'noindex',
     mainSite: '主站',
     otherSites: '其他站点',
+    sitesNav: '站点导航',
     desktopNav: '主导航',
     mobileNav: '手机导航',
     openMenu: '打开菜单',
@@ -323,6 +324,7 @@ export const uiText = {
     noindex: 'noindex',
     mainSite: 'Main site',
     otherSites: 'Other sites',
+    sitesNav: 'Sites',
     desktopNav: 'Main navigation',
     mobileNav: 'Mobile navigation',
     openMenu: 'Open menu',
@@ -460,16 +462,16 @@ export function headerNav(context: SiteUiContext): NavItem[] {
   const { site, labels, lang, origins } = context;
   return [
     {
-      key: 'drinks',
-      label: labels.navDrinks,
-      href: siteLink(site.key, 'beverages', navListPath('styles', lang), origins),
-      icon: 'glass',
-    },
-    {
       key: 'guide',
       label: labels.navGuide,
       href: siteLink(site.key, 'main', homePath(lang), origins),
       icon: 'drop',
+    },
+    {
+      key: 'drinks',
+      label: labels.navDrinks,
+      href: siteLink(site.key, 'beverages', navListPath('styles', lang), origins),
+      icon: 'glass',
     },
     {
       key: 'culture',
@@ -490,10 +492,10 @@ export function bottomNav(context: SiteUiContext, active: string): NavItem[] {
   const { site, labels, lang, origins } = context;
   const items = [
     {
-      key: 'discover',
-      label: labels.navDiscover,
+      key: 'guide',
+      label: labels.navGuide,
       href: siteLink(site.key, 'main', homePath(lang), origins),
-      icon: 'compass',
+      icon: 'drop',
     },
     {
       key: 'drinks',
@@ -502,10 +504,10 @@ export function bottomNav(context: SiteUiContext, active: string): NavItem[] {
       icon: 'glass',
     },
     {
-      key: 'guide',
-      label: labels.navGuide,
-      href: siteLink(site.key, 'main', homePath(lang), origins),
-      icon: 'drop',
+      key: 'culture',
+      label: labels.navCulture,
+      href: siteLink(site.key, 'culture', homePath(lang), origins),
+      icon: 'book',
     },
     {
       key: 'places',

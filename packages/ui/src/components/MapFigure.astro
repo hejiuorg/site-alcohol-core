@@ -1,0 +1,178 @@
+---
+import type { PageData } from '@hejiu/build-tools';
+import outlines from '../assets/maps/country-outlines.json';
+import register from '../assets/maps/map-register.json';
+
+interface Props {
+  page: PageData;
+}
+
+const { page } = Astro.props;
+const zh = page.lang === 'zh';
+const entry = (register.places as Array<Record<string, unknown>>).find((item) => item.id === page.id);
+const countryCode = page.mapCountryCode;
+const rings =
+  countryCode && Object.prototype.hasOwnProperty.call(outlines.countries, countryCode)
+    ? (outlines.countries as Record<string, number[][][]>)[countryCode]
+    : null;
+const canRender =
+  page.type === 'place' &&
+  page.latitude !== null &&
+  page.longitude !== null &&
+  entry?.status === 'drawn' &&
+  Boolean(rings && rings.length > 0);
+
+const width = 360;
+const height = 260;
+const pad = 20;
+const lon = page.longitude ?? 0;
+const lat = page.latitude ?? 0;
+
+const points = (rings ?? []).flat();
+const minLon = Math.min(...points.map(([x]) => x));
+const maxLon = Math.max(...points.map(([x]) => x));
+const minLat = Math.min(...points.map(([, y]) => y));
+const maxLat = Math.max(...points.map(([, y]) => y));
+const scale = Math.min(
+  (width - pad * 2) / Math.max(maxLon - minLon, 0.001),
+  (height - pad * 2) / Math.max(maxLat - minLat, 0.001),
+);
+const offsetX = (width - (maxLon - minLon) * scale) / 2;
+const offsetY = (height - (maxLat - minLat) * scale) / 2;
+const project = (x: number, y: number): [number, number] => [
+  offsetX + (x - minLon) * scale,
+  offsetY + (maxLat - y) * scale,
+];
+const paths = (rings ?? []).map(
+  (ring) => `M${ring.map(([x, y]) => project(x, y).map((n) => n.toFixed(1)).join(',')).join('L')}Z`,
+);
+const [markerX, markerY] = project(lon, lat);
+const lonLines: number[] = [];
+for (let value = Math.ceil(minLon); value <= Math.floor(maxLon); value += 1) lonLines.push(value);
+const latLines: number[] = [];
+for (let value = Math.ceil(minLat); value <= Math.floor(maxLat); value += 1) latLines.push(value);
+
+const basemap = register.basemap;
+const coordinateSource = zh
+  ? (entry?.coordinate_source_zh as string | undefined)
+  : (entry?.coordinate_source_en as string | undefined);
+const titleId = `map-title-${page.slug}`;
+---
+
+{
+  canRender && (
+    <figure class="detail-map" aria-labelledby={titleId}>
+      <svg
+        viewBox={`0 0 ${width} ${height}`}
+        role="img"
+        aria-labelledby={titleId}
+        class="detail-map__svg"
+      >
+        <title id={titleId}>
+          {zh ? `${page.title}位置示意图` : `Locator map for ${page.title}`}
+        </title>
+        <rect x="0" y="0" width={width} height={height} class="detail-map__water" />
+        {lonLines.map((value) => (
+          <line
+            x1={project(value, minLat)[0]}
+            y1={pad}
+            x2={project(value, minLat)[0]}
+            y2={height - pad}
+            class="detail-map__grid"
+          />
+        ))}
+        {latLines.map((value) => (
+          <line
+            x1={pad}
+            y1={project(minLon, value)[1]}
+            x2={width - pad}
+            y2={project(minLon, value)[1]}
+            class="detail-map__grid"
+          />
+        ))}
+        {paths.map((path) => (
+          <path d={path} class="detail-map__land" />
+        ))}
+        <circle cx={markerX} cy={markerY} r="9" class="detail-map__halo" />
+        <circle cx={markerX} cy={markerY} r="4.5" class="detail-map__marker" />
+        <text x={markerX + 12} y={markerY + 4} class="detail-map__label">
+          {page.title}
+        </text>
+      </svg>
+      <figcaption class="detail-map__caption">
+        <span>
+          {zh ? '底图' : 'Basemap'}：
+          <a href={basemap.source} rel="noopener noreferrer" target="_blank">
+            {basemap.name}
+          </a>
+          （{basemap.license}）
+        </span>
+        <span>
+          {zh ? '坐标系' : 'Coordinate system'}：{basemap.coordinate_system}
+        </span>
+        <span>{zh ? '坐标出处' : 'Coordinate source'}：{coordinateSource}</span>
+        <span class="detail-map__note">
+          {zh
+            ? '国家轮廓为定位示意，不用于导航；地图不显示道路与边界细节。'
+            : 'Country outlines are for orientation only and not for navigation; roads and boundary detail are not shown.'}
+        </span>
+      </figcaption>
+    </figure>
+  )
+}
+
+<style>
+  .detail-map {
+    margin: 22px 0 0;
+    padding: 14px;
+    border: 1px solid var(--line);
+    border-radius: 14px;
+    background: var(--surface);
+  }
+  .detail-map__svg {
+    display: block;
+    width: 100%;
+    height: auto;
+    border-radius: 10px;
+  }
+  .detail-map__water {
+    fill: var(--surface-2);
+  }
+  .detail-map__grid {
+    stroke: var(--line);
+    stroke-width: 0.7;
+    opacity: 0.7;
+  }
+  .detail-map__land {
+    fill: var(--surface-3);
+    stroke: var(--line-strong);
+    stroke-width: 1;
+  }
+  .detail-map__halo {
+    fill: var(--accent-soft);
+    stroke: var(--accent-line);
+    stroke-width: 1;
+  }
+  .detail-map__marker {
+    fill: var(--accent);
+  }
+  .detail-map__label {
+    fill: var(--ink);
+    font-size: 11px;
+    font-weight: 600;
+  }
+  .detail-map__caption {
+    display: grid;
+    gap: 4px;
+    margin-top: 10px;
+    color: var(--muted);
+    font-size: 0.78rem;
+    line-height: 1.5;
+  }
+  .detail-map__caption a {
+    color: var(--ink-2);
+  }
+  .detail-map__note {
+    opacity: 0.85;
+  }
+</style>

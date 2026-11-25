@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "sourceFiles": [
+    {
+      "file": "types.json",
+      "origin": "docs/plans/types.json",
+      "sha256": "3f6e511b1dc2918e5871e5fbec36d721db555cd039f766ac1888cd0e7af16c32"
+    },
+    {
+      "file": "repositories.json",
+      "origin": "docs/plans/repositories.json",
+      "sha256": "37fce8995763e29447ae9ae37555b138eddc68abc2c068a553788e2b77d392f5"
+    }
+  ]
+}

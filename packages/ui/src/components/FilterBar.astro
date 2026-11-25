@@ -1,0 +1,91 @@
+---
+interface Props {
+  tags: Array<{ tag: string; count: number }>;
+  target: string;
+  labels: {
+    filterTitle: string;
+    filterSearch: string;
+    filterAllTags: string;
+    filterEmpty: string;
+    filterCount: string;
+    filterTag: string;
+  };
+}
+const { tags, target, labels } = Astro.props;
+---
+<div
+  class="filter-bar"
+  data-filter-bar
+  data-target={target}
+  data-count={labels.filterCount}
+  data-empty={labels.filterEmpty}
+>
+  <div class="filter-bar__head">
+    <p class="filter-bar__title">{labels.filterTitle}</p>
+    <p class="filter-bar__status" data-filter-status aria-live="polite"></p>
+  </div>
+  <label class="sr-only" for={`filter-input-${target}`}>{labels.filterSearch}</label>
+  <input
+    id={`filter-input-${target}`}
+    class="filter-input"
+    type="search"
+    placeholder={labels.filterSearch}
+    autocomplete="off"
+    data-filter-input
+  />
+  <div class="filter-tags" role="group" aria-label={labels.filterTag}>
+    <button class="filter-chip filter-chip--active" type="button" data-filter-tag="">
+      {labels.filterAllTags}
+    </button>
+    {tags.map((entry) => (
+      <button class="filter-chip" type="button" data-filter-tag={entry.tag}>
+        {entry.tag} <span class="filter-chip__count">{entry.count}</span>
+      </button>
+    ))}
+  </div>
+  <p class="filter-empty" data-filter-empty hidden>{labels.filterEmpty}</p>
+</div>
+<script is:inline>
+  (() => {
+    const init = () => {
+      document.querySelectorAll('[data-filter-bar]').forEach((bar) => {
+        const target = document.getElementById(bar.dataset.target || '');
+        if (!target) return;
+        const cards = Array.from(target.querySelectorAll('[data-filterable]'));
+        const input = bar.querySelector('[data-filter-input]');
+        const status = bar.querySelector('[data-filter-status]');
+        const empty = bar.querySelector('[data-filter-empty]');
+        const countTemplate = bar.dataset.count || '{n}';
+        let activeTag = '';
+        const apply = () => {
+          const query = (input && input.value ? input.value : '').trim().toLowerCase();
+          let shown = 0;
+          cards.forEach((card) => {
+            const tags = (card.dataset.tags || '').split(/\s+/).filter(Boolean);
+            const text = card.dataset.search || '';
+            const tagOk = !activeTag || tags.indexOf(activeTag) !== -1;
+            const textOk = !query || text.indexOf(query) !== -1;
+            const visible = tagOk && textOk;
+            card.hidden = !visible;
+            if (visible) shown += 1;
+          });
+          if (status) status.textContent = countTemplate.replace('{n}', String(shown));
+          if (empty) empty.hidden = shown !== 0;
+        };
+        if (input) input.addEventListener('input', apply);
+        bar.querySelectorAll('[data-filter-tag]').forEach((button) => {
+          button.addEventListener('click', () => {
+            activeTag = button.dataset.filterTag || '';
+            bar.querySelectorAll('[data-filter-tag]').forEach((entry) => {
+              entry.classList.toggle('filter-chip--active', entry === button);
+            });
+            apply();
+          });
+        });
+        apply();
+      });
+    };
+    if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init);
+    else init();
+  })();
+</script>

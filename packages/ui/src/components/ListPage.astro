@@ -1,0 +1,135 @@
+---
+import SiteLayout from './SiteLayout.astro';
+import EntityCard from './EntityCard.astro';
+import FilterBar from './FilterBar.astro';
+import Icon from './Icon.astro';
+import {
+  directoryStats,
+  formatDate,
+  homePath,
+  listPath,
+  qualityRank,
+  typeIntro,
+  typeLabel,
+  uiFor,
+  type UiLang,
+} from '../lib';
+import type { ListPageData } from '@hejiu/build-tools';
+
+interface Props {
+  siteKey: string;
+  list: ListPageData;
+}
+const { siteKey, list } = Astro.props;
+const lang = list.lang as UiLang;
+const context = uiFor(siteKey, lang);
+const { site, labels, contracts } = context;
+const home = homePath(lang);
+const label = typeLabel(contracts, list.type, lang);
+const title = `${label} · ${lang === 'zh' ? site.labelZh : site.labelEn} · ${lang === 'zh' ? '喝酒去' : 'Hejiu'}`;
+const canonical = `https://${site.host}${listPath(list.typePath, lang)}`;
+const active = site.main ? 'guide' : site.key === 'atlas' ? 'places' : site.key === 'beverages' ? 'drinks' : '';
+const stats = directoryStats(list);
+const intro = typeIntro(list.type, lang) || list.description;
+const highlights = qualityRank(list.pages.filter((page) => page.published), lang, 3);
+const otherLang = lang === 'zh' ? 'en' : 'zh';
+const otherList = context.data.lists.find(
+  (entry) => entry.typePath === list.typePath && entry.lang === otherLang,
+);
+const alternateHref = otherList ? listPath(list.typePath, otherLang) : null;
+const alternateState = otherList ? 'available' : 'missing';
+---
+<SiteLayout
+  siteKey={siteKey}
+  lang={lang}
+  title={title}
+  description={list.description}
+  canonical={canonical}
+  pagePath={listPath(list.typePath, lang)}
+  noindex={list.noindex}
+  active={active}
+  pageType="list"
+  alternateHref={alternateHref}
+  alternateState={alternateState}
+>
+  <div class="shell">
+    <nav class="breadcrumbs" aria-label="Breadcrumb">
+      <a href={home}>{labels.home}</a>
+      <span class="breadcrumbs__sep">/</span>
+      <span aria-current="page">{label}</span>
+    </nav>
+    <header class="page-head">
+      <p class="eyebrow">{site.key === 'beverages' ? labels.navDrinks : site.main ? labels.navGuide : site.key === 'atlas' ? labels.navPlaces : labels.navCulture}</p>
+      <div class="page-head__row">
+        <div>
+          <h1>{label}</h1>
+          <p class="page-head__intro">{intro}</p>
+        </div>
+        <span class="page-head__count">
+          {stats.published} {labels.entries}
+          {stats.preview > 0 ? ` · ${stats.preview} ${labels.previewNotice}` : ''}
+        </span>
+      </div>
+    </header>
+    {list.noindex && (
+      <div class="preview-banner">{labels.listPreviewNote}</div>
+    )}
+
+    <div class="status-strip status-strip--compact" aria-label={labels.sources}>
+      <div class="status-strip__item"><span class="status-strip__value">{stats.published}</span><span class="status-strip__label">{labels.statsPages}</span></div>
+      <div class="status-strip__item"><span class="status-strip__value">{stats.sources}</span><span class="status-strip__label">{labels.statsSources}</span></div>
+      <div class="status-strip__item"><span class="status-strip__value">{stats.bilingual}</span><span class="status-strip__label">{labels.bilingualPages}</span></div>
+      <div class="status-strip__item"><span class="status-strip__value">{formatDate(stats.lastChecked, lang)}</span><span class="status-strip__label">{labels.statsChecked}</span></div>
+    </div>
+
+    {highlights.length > 0 && (
+      <section class="section section--tight" aria-labelledby="list-featured-title">
+        <div class="section-head">
+          <div>
+            <p class="eyebrow">{labels.featured}</p>
+            <h2 id="list-featured-title">{labels.listFeatured}</h2>
+            <p>{labels.listFeaturedDesc}</p>
+          </div>
+        </div>
+        <div class="feature-grid">
+          {highlights.map((page) => <EntityCard page={page} compact />)}
+        </div>
+      </section>
+    )}
+
+    <section class="section section--tight" aria-labelledby="list-all-title">
+      <div class="section-head">
+        <div>
+          <p class="eyebrow">{labels.browse}</p>
+          <h2 id="list-all-title">{label}</h2>
+        </div>
+      </div>
+      <FilterBar tags={stats.tags} target="list-grid" labels={labels} />
+      {list.pages.length > 0 ? (
+        <div class="list-grid" id="list-grid">
+          {list.pages.map((page) => <EntityCard page={page} />)}
+        </div>
+      ) : (
+        <p class="empty-state">{labels.listEmpty}</p>
+      )}
+    </section>
+
+    <section class="section section--tight" aria-labelledby="list-updated-title">
+      <div class="section-head">
+        <div>
+          <p class="eyebrow">{labels.updatedNote}</p>
+          <h2 id="list-updated-title">{labels.updatedNote}</h2>
+          <p>{labels.updatedNoteDesc}</p>
+        </div>
+      </div>
+      <div class="callout">
+        <div>
+          <p class="callout__title">{labels.statsChecked} · {formatDate(stats.lastChecked, lang)}</p>
+          <p>{labels.statsSources}: {stats.sources} · {labels.sourceVerifiedPages}: {stats.verified}</p>
+        </div>
+      </div>
+    </section>
+
+    <p><a class="text-link" href={home}><Icon name="arrow-left" size={16} /> {labels.backToHome}</a></p>
+  </div>
+</SiteLayout>

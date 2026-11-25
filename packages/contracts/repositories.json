@@ -1,0 +1,17 @@
+{
+  "schemaVersion": 2,
+  "status": "local-restructure-2026-11-24",
+  "date": "2026-11-24",
+  "githubOwner": "hejiuorg",
+  "remoteRepositoriesCreated": false,
+  "languages": ["zh", "en"],
+  "deploymentTarget": "GitHub Pages",
+  "sharedPackagesHost": "site-alcohol-core",
+  "contentRepository": "world-alcohol-encyclopedia",
+  "sites": [
+    {"key":"main","contentRepository":"world-alcohol-encyclopedia","contentPath":"guide","siteRepository":"site-alcohol-main","labelZh":"喝法","host":"hejiu.org","subdomain":null,"main":true},
+    {"key":"beverages","contentRepository":"world-alcohol-encyclopedia","contentPath":"beverages","siteRepository":"site-alcohol-beverages","labelZh":"识酒","host":"beverages.hejiu.org","subdomain":"beverages","main":false},
+    {"key":"culture","contentRepository":"world-alcohol-encyclopedia","contentPath":"culture","siteRepository":"site-alcohol-culture","labelZh":"酒文化","host":"culture.hejiu.org","subdomain":"culture","main":false},
+    {"key":"atlas","contentRepository":"world-alcohol-encyclopedia","contentPath":"atlas","siteRepository":"site-alcohol-atlas","labelZh":"去处","host":"atlas.hejiu.org","subdomain":"atlas","main":false}
+  ]
+}

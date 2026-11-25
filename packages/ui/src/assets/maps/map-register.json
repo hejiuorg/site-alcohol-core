@@ -1,0 +1,63 @@
+{
+  "basemap": {
+    "name": "Natural Earth 1:110m Admin 0 Countries",
+    "license": "Public domain",
+    "license_url": "https://www.naturalearthdata.com/about/terms-of-use/",
+    "source": "https://www.naturalearthdata.com/",
+    "retrieved": "2026-11-05",
+    "coordinate_system": "WGS84 (EPSG:4326) decimal degrees",
+    "projection": "Equirectangular locator view; simplified country outlines, not for navigation"
+  },
+  "places": [
+    {
+      "id": "place:ye-olde-trip-to-jerusalem",
+      "slug": "ye-olde-trip-to-jerusalem",
+      "country_code": "GB",
+      "latitude": 52.9493,
+      "longitude": -1.1526,
+      "status": "drawn",
+      "coordinate_source_zh": "条目 frontmatter（项目核验 2026-11-04）；诺丁汉条目来源中的 Atlas Obscura 页面用于对照洞穴位置与坐标。",
+      "coordinate_source_en": "Entry frontmatter (project check 2026-11-04); the Atlas Obscura page cited in the Nottingham entry was used to cross-check the cave location and coordinates."
+    },
+    {
+      "id": "place:mermaid-inn",
+      "slug": "mermaid-inn",
+      "country_code": "GB",
+      "latitude": 50.9501,
+      "longitude": 0.7320,
+      "status": "drawn",
+      "coordinate_source_zh": "条目 frontmatter（项目核验 2026-11-04）；以官方地址 Mermaid Street, Rye, East Sussex TN31 7EY 对照。",
+      "coordinate_source_en": "Entry frontmatter (project check 2026-11-04); cross-checked against the official address Mermaid Street, Rye, East Sussex TN31 7EY."
+    },
+    {
+      "id": "place:augustiner-braeu",
+      "slug": "augustiner-braeu",
+      "country_code": "DE",
+      "latitude": 48.1389,
+      "longitude": 11.5434,
+      "status": "drawn",
+      "coordinate_source_zh": "条目 frontmatter（项目核验 2026-11-04）；以官方地址 Landsberger Straße 31–35, 80339 Munich 对照。",
+      "coordinate_source_en": "Entry frontmatter (project check 2026-11-04); cross-checked against the official address Landsberger Strasse 31–35, 80339 Munich."
+    },
+    {
+      "id": "place:changyu-wine-culture-museum",
+      "slug": "changyu-wine-culture-museum",
+      "country_code": "CN",
+      "latitude": 37.5422,
+      "longitude": 121.4059,
+      "status": "deferred",
+      "reason_zh": "中国境内地点必须使用带审图号的合规底图；本项目尚未取得可用底图，暂缓绘制。",
+      "reason_en": "Places in China must use a compliant basemap carrying a map approval number (审图号). No such basemap is available to this project yet, so the map is deferred."
+    },
+    {
+      "id": "place:tsingtao-beer-museum",
+      "slug": "tsingtao-beer-museum",
+      "country_code": "CN",
+      "latitude": 36.0789,
+      "longitude": 120.3414,
+      "status": "deferred",
+      "reason_zh": "中国境内地点必须使用带审图号的合规底图；本项目尚未取得可用底图，暂缓绘制。",
+      "reason_en": "Places in China must use a compliant basemap carrying a map approval number (审图号). No such basemap is available to this project yet, so the map is deferred."
+    }
+  ]
+}

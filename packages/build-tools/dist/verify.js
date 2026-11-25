@@ -253,12 +253,15 @@ export function verifyPages(workspaceRoot) {
             }
             const expectedAlternates = page.alternates.filter((alternate) => alternate.published);
             const actualAlternates = alternatesOf(html);
-            const expectedCount = expectedAlternates.length + 1;
+            const expectedCount = expectedAlternates.length + 2;
             if (actualAlternates.length !== expectedCount) {
-                errors.push(`${site.key}: ${page.path} has ${actualAlternates.length} hreflang links, expected ${expectedCount} (self + alternates)`);
+                errors.push(`${site.key}: ${page.path} has ${actualAlternates.length} hreflang links, expected ${expectedCount} (self + alternates + x-default)`);
             }
             if (!actualAlternates.some((alternate) => alternate.lang === page.lang)) {
                 errors.push(`${site.key}: ${page.path} is missing its self-referencing hreflang`);
+            }
+            if (!actualAlternates.some((alternate) => alternate.lang === 'x-default')) {
+                errors.push(`${site.key}: ${page.path} is missing x-default hreflang`);
             }
             for (const alternate of actualAlternates) {
                 if (!/^https:\/\//.test(alternate.href)) {

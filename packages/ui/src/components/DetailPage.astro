@@ -67,6 +67,36 @@ const siteLabel = (key: string): string => {
   const match = contracts.sites.find((entry) => entry.key === key);
   return match ? (page.lang === 'zh' ? match.labelZh : match.labelEn) : key;
 };
+const schemaType = page.type === 'place' ? 'Place' : page.type === 'event' ? 'Event' : 'Article';
+const entitySchema: Record<string, unknown> = {
+  '@type': schemaType,
+  '@id': `${page.canonical}#${schemaType.toLowerCase()}`,
+  name: page.title,
+  headline: page.title,
+  description: page.summary,
+  url: page.canonical,
+  mainEntityOfPage: page.canonical,
+  inLanguage: page.lang === 'zh' ? 'zh-CN' : 'en',
+  isPartOf: { '@id': `https://${site.host}#website` },
+  publisher: { '@id': 'https://hejiu.org#organization' },
+  ...(page.lastReviewed ? { dateModified: page.lastReviewed } : {}),
+};
+if (schemaType === 'Place') {
+  entitySchema.address = { '@type': 'PostalAddress', addressCountry: page.mapCountryCode || undefined };
+  if (page.latitude !== null && page.longitude !== null) {
+    entitySchema.geo = { '@type': 'GeoCoordinates', latitude: page.latitude, longitude: page.longitude };
+  }
+}
+if (schemaType === 'Event') {
+  entitySchema.eventAttendanceMode = 'https://schema.org/OfflineEventAttendanceMode';
+}
+const imageMatch = page.html.match(/<img[^>]*src="([^"]+)"/i);
+const pageImage = imageMatch ? new URL(imageMatch[1], page.canonical).href : undefined;
+const breadcrumbs = [
+  { name: labels.home, url: `https://${site.host}${home}` },
+  { name: type, url: `https://${site.host}${listHref}` },
+  { name: page.title, url: page.canonical },
+];
 ---
 <SiteLayout
   siteKey={page.siteKey}
@@ -81,6 +111,9 @@ const siteLabel = (key: string): string => {
   alternateHref={alternateHref}
   alternateState={alternateState}
   statusText={archive ? labels.archiveRecord : page.published ? labels.reviewed : labels.needsReview}
+  entitySchema={entitySchema}
+  breadcrumbs={breadcrumbs}
+  image={pageImage}
 >
   <div class="shell">
     <nav class="breadcrumbs" aria-label="Breadcrumb">

@@ -259,6 +259,34 @@ async function fetchSearchData(
   return Promise.all(response.results.slice(0, 40).map((result) => result.data()));
 }
 
+const SEARCH_SYNONYMS: string[][] = [
+  ['白酒', '高粱酒', '烧酒', 'baijiu'],
+  ['黄酒', '绍兴酒', '花雕', 'yellow wine'],
+  ['清酒', '日本酒', 'sake'],
+  ['威士忌', 'whisky', 'whiskey'],
+  ['葡萄酒', '红酒', 'wine'],
+  ['啤酒', 'beer', 'craft beer', '精酿'],
+  ['鸡尾酒', 'cocktail'],
+  ['酒庄', 'winery', 'chateau'],
+  ['酒杯', 'glass', '酒器'],
+  ['酱香', 'sauce aroma'],
+  ['浓香', 'strong aroma'],
+  ['清香', 'light aroma'],
+];
+
+function searchAlternatives(query: string): string[] {
+  const normalized = query.trim().toLocaleLowerCase();
+  const group = SEARCH_SYNONYMS.find((items) => items.some((item) => item.toLocaleLowerCase() === normalized));
+  if (!group) return [];
+  return group.filter((item) => item.toLocaleLowerCase() !== normalized).slice(0, 3);
+}
+
+function mergeSearchResults(groups: SearchResultData[]): SearchResultData[] {
+  const merged = new Map<string, SearchResultData>();
+  for (const entry of groups) if (!merged.has(entry.url)) merged.set(entry.url, entry);
+  return [...merged.values()];
+}
+
 async function runSearch(root: HTMLElement, query: string): Promise<void> {
   const results = root.querySelector<HTMLElement>('[data-search-results]');
   const status = root.querySelector<HTMLElement>('[data-search-status]');
@@ -276,9 +304,16 @@ async function runSearch(root: HTMLElement, query: string): Promise<void> {
     const pf = await loadPagefind(bundle);
     const { filters, siteValues, langValues } = selectedFilters(root);
     const chars = [...trimmed].filter((char) => /[㐀-鿿]/.test(char));
+    const alternatives = searchAlternatives(trimmed);
     let data: SearchResultData[];
     if (chars.length >= 2) {
       data = cjkLocalResults(await loadCjkIndex(root), trimmed);
+      if (data.length === 0 && alternatives.length > 0) {
+        const records = await loadCjkIndex(root);
+        data = mergeSearchResults(
+          alternatives.flatMap((alternative) => cjkLocalResults(records, alternative)),
+        );
+      }
       if (data.length === 0) {
         const grams = cjkBigrams(trimmed);
         const groups = await Promise.all(grams.map((gram) => fetchSearchData(pf, gram, filters)));
@@ -302,6 +337,12 @@ async function runSearch(root: HTMLElement, query: string): Promise<void> {
       }
     } else {
       data = await fetchSearchData(pf, trimmed, filters);
+      if (data.length === 0 && alternatives.length > 0) {
+        const groups = await Promise.all(
+          alternatives.map((alternative) => fetchSearchData(pf, alternative, filters)),
+        );
+        data = mergeSearchResults(groups);
+      }
     }
     const filtered = data.filter((entry) => {
       if (siteValues.length > 0) {
@@ -317,7 +358,7 @@ async function runSearch(root: HTMLElement, query: string): Promise<void> {
     const shown = filtered.slice(0, 20);
     status.textContent = shown.length
       ? `${shown.length} ${label('resultsCount', '条结果')}`
-      : label('searchEmpty', '没有找到匹配内容。');
+      : `${label('searchEmpty', '没有找到匹配内容。')} ${label('searchSuggestions', '试试：白酒、黄酒、清酒、威士忌、葡萄酒。')}`;
     for (const entry of shown) results.append(makeResult(entry));
   } catch (error) {
     console.error(error);

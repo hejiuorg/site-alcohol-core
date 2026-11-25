@@ -30,6 +30,9 @@ interface Props {
   alternateHref?: string | null;
   alternateState?: 'available' | 'missing' | 'needs-review' | 'outdated';
   statusText?: string;
+  entitySchema?: Record<string, unknown>;
+  breadcrumbs?: Array<{ name: string; url: string }>;
+  image?: string;
 }
 const {
   siteKey,
@@ -44,6 +47,9 @@ const {
   alternateHref,
   alternateState = 'available',
   statusText,
+  entitySchema,
+  breadcrumbs,
+  image,
 } = Astro.props;
 
 const context = uiFor(siteKey, lang);
@@ -79,8 +85,52 @@ const hreflangAlternate =
         url: alternate.startsWith('http') ? alternate : `https://${site.host}${alternate}`,
       }
     : null;
-const year = 2026;
+const xDefaultHref = !noindex
+  ? lang === 'zh'
+    ? canonical
+    : hreflangAlternate?.url || canonical
+  : null;
 const base = import.meta.env.BASE_URL;
+const socialImage = image
+  ? image.startsWith('http')
+    ? image
+    : `https://${site.host}${image}`
+  : `https://${site.host}${base}brand/d-mascot-512.png`;
+const websiteSchema = {
+  '@type': 'WebSite',
+  '@id': `https://${site.host}#website`,
+  name: '喝酒去 Hejiu',
+  url: `https://${site.host}/`,
+  inLanguage: lang === 'zh' ? 'zh-CN' : 'en',
+  potentialAction: {
+    '@type': 'SearchAction',
+    target: `https://${site.host}${searchPath(lang)}?q={search_term_string}`,
+    'query-input': 'required name=search_term_string',
+  },
+};
+const organizationSchema = {
+  '@type': 'Organization',
+  '@id': 'https://hejiu.org#organization',
+  name: '喝酒去 Hejiu',
+  url: 'https://hejiu.org/',
+  logo: 'https://hejiu.org/brand/d-mascot-512.png',
+  sameAs: ['https://github.com/hejiuorg'],
+};
+const graph: Record<string, unknown>[] = [websiteSchema, organizationSchema];
+if (!noindex && breadcrumbs?.length) {
+  graph.push({
+    '@type': 'BreadcrumbList',
+    itemListElement: breadcrumbs.map((item, index) => ({
+      '@type': 'ListItem',
+      position: index + 1,
+      name: item.name,
+      item: item.url,
+    })),
+  });
+}
+if (!noindex && entitySchema) graph.push(entitySchema);
+const jsonLd = JSON.stringify({ '@context': 'https://schema.org', '@graph': graph }).replace(/</g, '\\u003c');
+const year = 2026;
 const pageState = !noindex
   ? labels.published
   : pageType === 'detail'
@@ -105,6 +155,7 @@ const pageState = !noindex
     <link rel="canonical" href={canonical} />
     {hreflangAlternate && <link rel="alternate" hreflang={hreflangAlternate.lang} href={hreflangAlternate.url} />}
     {!noindex && <link rel="alternate" hreflang={lang} href={canonical} />}
+    {xDefaultHref && <link rel="alternate" hreflang="x-default" href={xDefaultHref} />}
     <meta name="robots" content={noindex ? 'noindex, nofollow' : 'index, follow'} />
     <meta name="hejiu-content-state" content={!noindex ? 'published' : pageType === 'detail' ? 'preview' : 'utility'} />
     <meta name="theme-color" content={site.accent} />
@@ -113,12 +164,16 @@ const pageState = !noindex
     <meta property="og:description" content={description} />
     <meta property="og:url" content={canonical} />
     <meta property="og:site_name" content="喝酒去 Hejiu" />
-    <meta property="og:image" content={`https://${site.host}${base}brand/d-mascot-512.png`} />
-    <meta property="og:image:alt" content="D 泡沫酒杯品牌形象" />
+    <meta property="og:image" content={socialImage} />
+    <meta property="og:image:alt" content={lang === 'zh' ? 'D 泡沫酒杯品牌形象' : 'D bubble-glass brand mark'} />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content={fullTitle} />
+    <meta name="twitter:description" content={description} />
+    <meta name="twitter:image" content={socialImage} />
+    <script type="application/ld+json" set:html={jsonLd} />
     <link rel="icon" href={`${base}favicon.svg`} type="image/svg+xml" />
     <link rel="apple-touch-icon" href={`${base}brand/d-mark-180.png`} />
     <link rel="manifest" href={`${base}site.webmanifest`} />
-    {site.main && <script is:inline src={`${base}compat.js`}></script>}
     <script is:inline>
       (function () {
         function readPreferenceCookie(name) {
@@ -155,6 +210,7 @@ const pageState = !noindex
     data-labels={JSON.stringify({
       searchLoading: labels.searchLoading,
       searchEmpty: labels.searchEmpty,
+      searchSuggestions: labels.searchSuggestions,
       searchError: labels.searchError,
       resultsCount: labels.resultsCount,
       save: labels.save,

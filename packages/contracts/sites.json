@@ -19,7 +19,7 @@
     },
     {
       "key": "beverages",
-      "labelZh": "诗酒",
+      "labelZh": "识酒",
       "labelEn": "Drinks",
       "contentRepository": "world-alcohol-encyclopedia",
       "contentPath": "beverages",

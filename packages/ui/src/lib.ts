@@ -20,7 +20,7 @@ export const uiText = {
     brandRoman: 'HEJIU',
     skipToContent: '跳到正文',
     navDiscover: '发现',
-    navDrinks: '诗酒',
+    navDrinks: '识酒',
     navGuide: '喝法',
     navCulture: '酒文化',
     navPlaces: '去处',

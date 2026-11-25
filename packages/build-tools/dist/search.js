@@ -93,6 +93,7 @@ export async function writeAggregateSearch(workspaceRoot) {
         if (fs.existsSync(outputPath))
             fs.renameSync(outputPath, backupPath);
         fs.renameSync(tempPath, outputPath);
+        fs.rmSync(tempPath, { recursive: true, force: true });
         fs.rmSync(backupPath, { recursive: true, force: true });
     }
     catch (error) {
